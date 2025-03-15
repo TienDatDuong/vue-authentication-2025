@@ -1,4 +1,4 @@
-import action from "./action";
+import actions from "./action";
 import getters from "./getter";
 import mutations from "./mutations";
 
@@ -6,10 +6,10 @@ export default {
   namespaced: true,
   state() {
     return {
-      name: "dtdat13",
+      name: "datdt",
     };
   },
   mutations,
   getters,
-  action,
+  actions,
 };
