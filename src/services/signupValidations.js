@@ -16,7 +16,19 @@ export default class SignupValidations {
     if (!Validations.minLength(this.password, 6)) {
       error["password"] = "password should be of 6 characters";
     }
-
     return error;
+  }
+
+  static getErrorMessageFromCode(errorCode) {
+    switch (errorCode) {
+      case "EMAIL_EXISTS":
+        return "Email already exists";
+      case "INVALID_PASSWORD":
+        return "The password is invalid or the user does not have a password";
+      case "EMAIL_NOT_FOUND":
+        return "Email not found";
+      default:
+        return "Unexpected error occuered. Please try again";
+    }
   }
 }
