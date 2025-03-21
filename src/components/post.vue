@@ -18,7 +18,7 @@
   </table>
 </template>
 <script>
-import axios from "axios";
+import AxiosTokenInstance from "../services/AxiosTokenInstance";
 import { mapGetters, mapMutations } from "vuex/dist/vuex.cjs.js";
 import {
   GET_USER_TOKEN_GETTER,
@@ -39,10 +39,9 @@ export default {
   },
   mounted() {
     this.showLoading(true);
-    axios
-      .get(
-        `http://authentication-vue3-default-rtdb.firebaseio.com/vue-3.json?auth=${this.token}`
-      )
+    AxiosTokenInstance.get(
+      `http://authentication-vue3-default-rtdb.firebaseio.com/vue-3.json`
+    )
       .then((res) => {
         this.showLoading(false);
         this.post = this.formatPost(res.data);
