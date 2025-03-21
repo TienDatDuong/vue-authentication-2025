@@ -6,11 +6,12 @@
           <h3>Signup</h3>
           <hr />
         </div>
+        <div v-if="error" class="alert text-danger">{{ error }}</div>
         <form @submit.prevent="onSignUp()">
           <div class="form-group">
             <label>Email</label>
             <input type="text" class="form-control" v-model="user.email" />
-            <p v-if="errors.email">{{ errors.email }}</p>
+            <p v-if="errors.email" class="text-danger">{{ errors.email }}</p>
           </div>
           <div class="form-group">
             <label>Password</label>
@@ -19,7 +20,7 @@
               class="form-control"
               v-model="user.password"
             />
-            <p v-if="errors.password">{{ errors.password }}</p>
+            <p v-if="errors.password" class="danger">{{ errors.password }}</p>
           </div>
           <div class="my-3">
             <button type="submit" class="btn btn-primary">Signup</button>
@@ -31,8 +32,12 @@
 </template>
 <script>
 import { mapActions } from "vuex";
-import { SIGNUP_ACTION } from "../store/module/auth/storecontant";
+import {
+  LOADING_SPINNER_SHOW_MUTATION,
+  SIGNUP_ACTION,
+} from "../store/module/auth/storecontant";
 import SignupValidations from "../services/signupValidations";
+import { mapMutations } from "vuex/dist/vuex.cjs.js";
 
 export default {
   data() {
@@ -42,13 +47,17 @@ export default {
         password: "",
       },
       errors: [],
+      error: "",
     };
   },
   methods: {
     ...mapActions("auth", {
       signup: SIGNUP_ACTION,
     }),
-    onSignUp() {
+    ...mapMutations({
+      showLoading: LOADING_SPINNER_SHOW_MUTATION,
+    }),
+    async onSignUp() {
       let validations = new SignupValidations(
         this.user.email,
         this.user.password
@@ -58,9 +67,18 @@ export default {
       if ("email" in this.errors || "password" in this.errors) {
         return false;
       }
-
+      //make spinner true
+      await this.showLoading(true);
       //signup registration
-      this.signup({ email: this.user.email, password: this.user.password });
+      this.signup({
+        email: this.user.email,
+        password: this.user.password,
+      }).catch((e) => {
+        this.error = e;
+        this.showLoading(false);
+      });
+      this.showLoading(true);
+      //make spinner false
     },
   },
 };

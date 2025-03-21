@@ -6,6 +6,7 @@
           <h3>Login</h3>
           <hr />
         </div>
+        <div v-if="error" class="alert text-danger">{{ error }}</div>
         <form @submit.prevent="onLogin()">
           <div class="form-group">
             <label>Email</label>
@@ -35,6 +36,11 @@
 </template>
 <script>
 import SignupValidations from "../services/signupValidations";
+import {
+  LOADING_SPINNER_SHOW_MUTATION,
+  LOGIN_ACTION,
+} from "../store/module/auth/storecontant";
+import { mapActions, mapMutations } from "vuex";
 
 export default {
   data() {
@@ -44,10 +50,17 @@ export default {
         password: "",
       },
       errors: [],
+      error: "",
     };
   },
   methods: {
-    onLogin() {
+    ...mapActions("auth", {
+      login: LOGIN_ACTION,
+    }),
+    ...mapMutations({
+      showLoading: LOADING_SPINNER_SHOW_MUTATION,
+    }),
+    async onLogin() {
       let validations = new SignupValidations(
         this.user.email,
         this.user.password
@@ -56,13 +69,19 @@ export default {
       this.errors = validations.checkValidations();
       if (this.errors.length) {
         return false;
+      } else {
+        this.showLoading(true);
+        await this.login({
+          email: this.user.email,
+          password: this.user.password,
+        }).catch((e) => {
+          console.log("e", e);
+          (this.error = e), this.showLoading(false);
+        });
+        this.showLoading(false);
+        this.$router.push("/posts");
       }
     },
   },
-  // computed: {
-  //   ...mapState("auth", {
-  //     firstName: (state) => state.name,
-  //   }),
-  // },
 };
 </script>
