@@ -79,7 +79,7 @@ export default {
           (this.error = e), this.showLoading(false);
         });
         this.showLoading(false);
-        // this.$router.push("/posts");
+        this.$router.push("/posts");
       }
     },
   },

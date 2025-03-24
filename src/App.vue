@@ -2,6 +2,7 @@
 import { mapState } from "vuex";
 import Navigation from "/src/components/TheNavigation.vue";
 import TheLoader from "/src/components/loader.vue";
+import { AUTH_LOGIN_ACTION } from "./store/module/auth/storecontant";
 export default {
   name: "App",
   components: { Navigation, TheLoader },
@@ -10,6 +11,9 @@ export default {
       showLoading: (stage) => stage.showLoading,
     }),
   },
+  created(){
+    this.$store.dispatch(`auth/${AUTH_LOGIN_ACTION}`)
+  }
 };
 </script>
 
