@@ -77,7 +77,8 @@ export default {
         this.error = e;
         this.showLoading(false);
       });
-      this.showLoading(true);
+      this.showLoading(false);
+      this.$router.push("/login")
       //make spinner false
     },
   },
