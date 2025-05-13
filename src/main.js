@@ -5,6 +5,7 @@ import App from "./App.vue";
 import Store from "./store/store";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./scss/main.scss";
 
 const app = createApp(App);
 app.use(Store);
