@@ -1,0 +1,71 @@
+body {
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.7;
+    color: $color-grey;
+    padding: 30px;
+}
+
+.heading-primary {
+    color: $color-white;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation-name: animationtest;
+    animation-duration: 2s;
+
+    /* animation-iteration-count: infinite; */
+    /* animation-delay: .3s; */
+    &--main {
+        display: block;
+        font-size: 62px;
+        font-weight: 400;
+        letter-spacing: 15px;
+        animation: moveInLeft 2s ease-out;
+    }
+
+    &--sub {
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 18px;
+        animation: moveInRight 2s ease-out;
+    }
+}
+
+.heading-secondary {
+    font-size: 3.5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: inline-block;
+    letter-spacing: 2rem;
+    cursor: pointer;
+    background-image: linear-gradient(to right, $color-primary-light, $color-primary-dark);
+    color: transparent;
+    -webkit-background-clip: text;
+    transition: all 0.2s;
+
+    &:hover {
+        transform: skewY(5deg) scale(1.1);
+        text-shadow: .5rem 1rem 2rem rgba($color-black, 0.2);
+        //offset-x offset-y blur-radius color;
+        // 1. offset-x (trục X - ngang):
+        // Đây là khoảng cách bóng theo chiều ngang. Dương (> 0): Bóng lệch sang phải so với chữ. Âm (< 0): Bóng lệch sang trái so với chữ. 🧭
+        // 2. offset-y (trục Y - dọc):
+        // Đây là khoảng cách bóng theo chiều dọc. Dương (> 0): Bóng lệch xuống dưới. Âm (< 0): Bóng lệch lên trên.
+    }
+}
+
+.heading-tertiary {
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.paragraph {
+    font-size: 1.6rem;
+
+    &:not(:last-child) {
+        margin-bottom: 3rem;
+    }
+}

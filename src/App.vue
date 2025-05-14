@@ -18,7 +18,12 @@ export default {
 </script>
 
 <template>
-  <Navigation />
+  <Navigation class="u-margin-bottom-small" />
+  <h2 class=" heading-primary u-center-text heading-primary--main">
+    <span class="heading-primary--main">
+        Website quản lý thư viện
+    </span>
+  </h2>
   <div class="container">
     <div class="row">
       <div class="col-md-12">

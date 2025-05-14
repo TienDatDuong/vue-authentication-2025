@@ -4,6 +4,7 @@ export const LOADING_SPINNER_SHOW_MUTATION = "[mutation] show loading spinner";
 export const LOGIN_ACTION = "[action] login user";
 export const LOGOUT_ACTION = "[action] logout user";
 export const AUTH_LOGIN_ACTION = "[action] Auth auto login"
+export const AUTH_LOGOUT_ACTION = "[action] Auth auto logout";
 export const AUTH_ACTION = "[action] Do User Auth";
 export const GET_USER_TOKEN_GETTER = "[getters] auth user token";
 export const IS_USER_AUTHENTICATE_GETTER = "[getters] is user authenticated"

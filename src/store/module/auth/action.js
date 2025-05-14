@@ -2,6 +2,7 @@ import axios from "axios";
 import {
   AUTH_ACTION,
   AUTH_LOGIN_ACTION,
+  AUTH_LOGOUT_ACTION,
   LOADING_SPINNER_SHOW_MUTATION,
   LOGIN_ACTION,
   LOGOUT_ACTION,
@@ -9,6 +10,8 @@ import {
   SIGNUP_ACTION,
 } from "./storecontant";
 import SignupValidations from "../../../services/signupValidations";
+
+let timer = '';
 
 export default {
   [LOGOUT_ACTION](context) {
@@ -19,6 +22,14 @@ export default {
       refreshToken: null,
       expiresIn: null,
     });
+    localStorage.removeItem('userData');
+    if(timer){
+      clearTimeout(timer)
+    }
+  },
+
+  [AUTH_LOGOUT_ACTION](context){
+    context.dispatch(LOGOUT_ACTION);
   },
 
   async [LOGIN_ACTION](context, payload) {
@@ -36,9 +47,21 @@ export default {
   },
 
   [AUTH_LOGIN_ACTION](context,payload){
-    let userData = localStorage.getItem("userData");
-    if(userData){
-      context.commit(SET_USER_TOKEN_DATA_MUTATION,JSON.parse(userData))
+    let userDataString = localStorage.getItem('userData');
+    if(userDataString){
+      let userData = JSON.parse(userDataString);
+      let expirationTime = userData.expiresIn - new Date().getTime();
+      console.log("expirationTime", expirationTime);
+      if (expirationTime < 10000) {
+        //do can get the token with refreshToken
+        //do the autoLogout
+        context.dispatch(AUTH_LOGOUT_ACTION);
+      } else {
+        setTimeout(() => {
+          context.dispatch(AUTH_LOGOUT_ACTION);
+        }, expirationTime);
+      }
+      context.commit(SET_USER_TOKEN_DATA_MUTATION, userData);
     }
   },
 
@@ -65,6 +88,12 @@ export default {
     }
     // context.commit(LOADING_SPINNER_SHOW_MUTATION, false, { root: true });
     if (res.status === 200) {
+      let expirationTime = +10 * 1000;
+
+      timer = setTimeout(() => {
+        context.dispatch(AUTH_LOGOUT_ACTION)
+      }, expirationTime);
+
       let tokenData = {
         token: res.data.idToken,
         email: res.data.email,
