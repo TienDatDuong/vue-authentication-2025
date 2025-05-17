@@ -11,20 +11,23 @@
             <router-link class="nav-link" v-if="isAuthenticated" to="/">Home</router-link>
           </li> -->
           <li class="nav-item">
-            <router-link class="nav-link active" v-if="!isAuthenticated" to="/login">Login</router-link>
+            <router-link class="nav-link" v-if="!isAuthenticated" to="/login">Đăng nhập</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" v-if="!isAuthenticated" to="/signup">Đăng ký thành viên</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">Tài liệu</router-link>
-          </li>
-           <!-- <li class="nav-item">
-            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">Tài liệu</router-link>
+            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">Danh sách tài liệu</router-link>
           </li>
            <li class="nav-item">
-            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">PTài liệu</router-link>
-          </li> -->
+            <router-link class="nav-link " v-if="isManager" to="/ql-dau-sach">Quản lý đầu sách, báo, tạp chí trong thư viện </router-link>
+          </li>
+           <li class="nav-item">
+            <router-link class="nav-link " v-if="isManager" to="/ql-nguoi-doc">Quản lý người đọc, nhân sự của thư viện</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link " v-if="isManager" to="/ql-muon-tra">Quản lý mượn trả tài liệu </router-link>
+          </li>
           <li class="nav-item" v-if="isAuthenticated">
             <a href="#" class="nav-link" @click.prevent="logout()">Đăng xuất</a>
           </li>
@@ -35,7 +38,7 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { IS_USER_AUTHENTICATE_GETTER, LOGOUT_ACTION } from '../store/module/auth/storecontant';
+import { CHECK_ADMIN, IS_USER_AUTHENTICATE_GETTER, LOGOUT_ACTION } from '../store/module/auth/storecontant';
 
 export default{
   data(){
@@ -56,8 +59,12 @@ export default{
     },
   computed:{
     ...mapGetters('auth',{
-      isAuthenticated: IS_USER_AUTHENTICATE_GETTER
-    })
+      isAuthenticated: IS_USER_AUTHENTICATE_GETTER,
+      isAdmin: CHECK_ADMIN
+    }),
+    isManager(){
+      return this.isAdmin && this.isAuthenticated
+    }
   }
 }
 </script>

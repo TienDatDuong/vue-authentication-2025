@@ -4,7 +4,7 @@
           <div class="col-md-6 offset-md-3">
               <div class="ct-modal">
                   <div>
-                  <h3 class="u-center-text fs-1 fw-bold">Website quản lý thư viện</h3>
+                  <h3 class="u-center-text fs-2 fw-bold">Website quản lý thư viện</h3>
                   <hr />
                   </div>
                   <div v-if="error" class="alert text-danger">{{ error }}</div>

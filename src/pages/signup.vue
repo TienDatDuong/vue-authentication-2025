@@ -1,9 +1,9 @@
 <template>
   <div class="row">
     <div class="col-md-6 offset-md-3">
-      <div>
+      <div class="ct-modal">
         <div>
-          <h3>Signup</h3>
+          <h3 class="u-center-text fs-2 fw-bold">Đăng ký thành viên </h3>
           <hr />
         </div>
         <div v-if="error" class="alert text-danger">{{ error }}</div>

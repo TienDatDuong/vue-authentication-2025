@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "./pages/login.vue";
 import Signup from "./pages/signup.vue";
-import Post from "./components/Post.vue";
+import Post from "./components/post.vue";
 //import Home from "./components/home.vue"
+import QlDauSach from "./components/ql-dau-sach.vue";
+import qlMuonTra from "./components/ql-muon-tra.vue";
+import qlNguoiDoc from "./components/ql-nguoi-doc.vue";
 import store from "./store/store";
 import { IS_USER_AUTHENTICATE_GETTER } from "./store/module/auth/storecontant";
 
@@ -11,6 +14,9 @@ const routes = [
   { path: "/login", component: Login, meta: { auth: false } },
   { path: "/signup", component: Signup, meta: { auth: false } },
   { path: "/posts", component: Post, meta: { auth: true } },
+  { path: "/ql-dau-sach", component: QlDauSach, meta: { auth: true } },
+  { path: "/ql-muon-tra", component: qlMuonTra, meta: { auth: true } },
+  { path: "/ql-nguoi-doc", component: qlNguoiDoc, meta: { auth: true } },
 ];
 
 const router = createRouter({

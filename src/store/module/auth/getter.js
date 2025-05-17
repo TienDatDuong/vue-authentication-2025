@@ -1,4 +1,4 @@
-import { GET_USER_TOKEN_GETTER, IS_USER_AUTHENTICATE_GETTER } from "./storecontant";
+import { CHECK_ADMIN, GET_USER_TOKEN_GETTER, IS_USER_AUTHENTICATE_GETTER } from "./storecontant";
 
 export default {
   [GET_USER_TOKEN_GETTER]: (stage) => {
@@ -6,5 +6,8 @@ export default {
   },
   [IS_USER_AUTHENTICATE_GETTER]:(stage) => {
     return !!stage.token;
-  }
+  },
+  [CHECK_ADMIN]: (stage) => {
+    return stage.email === "admin@gmail.com";
+  },
 };
