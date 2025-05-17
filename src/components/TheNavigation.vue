@@ -7,9 +7,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <router-link class="nav-link" v-if="isAuthenticated" to="/">Home</router-link>
-          </li>
+          </li> -->
           <li class="nav-item">
             <router-link class="nav-link active" v-if="!isAuthenticated" to="/login">Login</router-link>
           </li>

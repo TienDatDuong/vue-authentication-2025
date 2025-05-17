@@ -2,12 +2,12 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "./pages/login.vue";
 import Signup from "./pages/signup.vue";
 import Post from "./components/Post.vue";
-import Home from "./components/home.vue"
+//import Home from "./components/home.vue"
 import store from "./store/store";
 import { IS_USER_AUTHENTICATE_GETTER } from "./store/module/auth/storecontant";
 
 const routes = [
-  { path: "", component: Home },
+  { path: "", component: Login },
   { path: "/login", component: Login, meta: { auth: false } },
   { path: "/signup", component: Signup, meta: { auth: false } },
   { path: "/posts", component: Post, meta: { auth: true } },

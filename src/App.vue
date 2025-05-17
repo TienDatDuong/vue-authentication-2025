@@ -21,7 +21,7 @@ export default {
   <Navigation class="u-margin-bottom-small" />
   <h2 class=" heading-primary u-center-text heading-primary--main">
     <span class="heading-primary--main">
-        Website quản lý thư viện
+        Trường đại học mở hà nội
     </span>
   </h2>
   <div class="container">
