@@ -40,6 +40,8 @@ export default {
   },
 
   async [SIGNUP_ACTION](context, payload) {
+    //context giup cho ta truy cap den store
+    //payload gia tri duoc truyen tu component
     return context.dispatch(AUTH_ACTION, {
       ...payload,
       url: `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD-k4UXhvzWX67qLrg1eJjwUQEW03Noy4o`,
@@ -47,12 +49,13 @@ export default {
   },
 
   [AUTH_LOGIN_ACTION](context,payload){
+    console.log("da dang nhap tu localStorage");
     let userDataString = localStorage.getItem('userData');
     if(userDataString){
       let userData = JSON.parse(userDataString);
       let expirationTime = userData.expiresIn - new Date().getTime();
       console.log("expirationTime", expirationTime);
-      if (expirationTime < 10000) {
+      if (expirationTime < 60000) {
         //do can get the token with refreshToken
         //do the autoLogout
         context.dispatch(AUTH_LOGOUT_ACTION);
@@ -86,20 +89,22 @@ export default {
       );
       throw messageError;
     }
+    console.log("đã vào đây");
+    
     // context.commit(LOADING_SPINNER_SHOW_MUTATION, false, { root: true });
     if (res.status === 200) {
       let expirationTime = +10 * 1000;
 
-      timer = setTimeout(() => {
-        context.dispatch(AUTH_LOGOUT_ACTION)
-      }, expirationTime);
+      // timer = setTimeout(() => {
+      //   context.dispatch(AUTH_LOGOUT_ACTION)
+      // }, expirationTime);
 
       let tokenData = {
         token: res.data.idToken,
         email: res.data.email,
         userId: res.data.localId,
         refreshToken: res.data.refreshToken,
-        expiresIn: res.data.expiresIn,
+        expiresIn: res.data.expiresIn * 1000 + new Date().getTime(),
       };
       localStorage.setItem('userData', JSON.stringify(tokenData))
       context.commit(SET_USER_TOKEN_DATA_MUTATION, tokenData);

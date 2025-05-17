@@ -14,13 +14,19 @@
             <router-link class="nav-link active" v-if="!isAuthenticated" to="/login">Login</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" v-if="!isAuthenticated" to="/signup">Signup</router-link>
+            <router-link class="nav-link" v-if="!isAuthenticated" to="/signup">Đăng ký thành viên</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">Post</router-link>
+            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">Tài liệu</router-link>
           </li>
+           <!-- <li class="nav-item">
+            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">Tài liệu</router-link>
+          </li>
+           <li class="nav-item">
+            <router-link class="nav-link " v-if="isAuthenticated" to="/posts">PTài liệu</router-link>
+          </li> -->
           <li class="nav-item" v-if="isAuthenticated">
-            <a href="#" class="nav-link" @click.prevent="logout()">Logout</a>
+            <a href="#" class="nav-link" @click.prevent="logout()">Đăng xuất</a>
           </li>
         </ul>
       </div>

@@ -1,11 +1,18 @@
 <template>
-  <h2>Post Details</h2>
+  <h2>Danh sách tài liệu</h2>
+  <div>
+    <div class="input-group mb-3">
+    <button class="btn btn-outline-secondary" type="button" id="button-addon1">Tìm kiếm</button>
+    <input type="text" class="form-control" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+  </div>
+  </div>
   <table class="table">
     <thead>
       <tr>
-        <th>Id</th>
-        <th>Title</th>
-        <th>Descripttion</th>
+        <th>Số Thứ tự</th>
+        <th>Tên sách</th>
+        <th>Mô tả</th>
+        <th>Trạng thái</th>
       </tr>
     </thead>
     <tbody>
@@ -13,6 +20,7 @@
         <td>{{ post.id }}</td>
         <td>{{ post.descript }}</td>
         <td>{{ post.title }}</td>
+        <td>Đã cho mượn</td>
       </tr>
     </tbody>
   </table>
