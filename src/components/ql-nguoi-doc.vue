@@ -1,5 +1,5 @@
 <template>
-  <h2 class="u-margin-bottom-small ">Danh sách tài liệu</h2>
+  <h2 class="u-margin-bottom-small ">Quản lý người đọc, nhân sự của thư viện</h2>
   <div>
     <div class="input-group mb-3">
     <button class="btn btn-primary" type="button" @click="filterData()">Tìm kiếm</button>
