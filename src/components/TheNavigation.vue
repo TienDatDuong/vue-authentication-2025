@@ -63,7 +63,7 @@ export default{
       isAdmin: CHECK_ADMIN
     }),
     isManager(){
-      return this.isAdmin && this.isAuthenticated
+      return (this.isAdmin && this.isAuthenticated)
     }
   }
 }
