@@ -16,7 +16,7 @@
 </template>
 <script setup>
 import { ref } from 'vue';
-import {cloneDeep} from 'lodash';
+// import {cloneDeep} from 'lodash';
 const props = defineProps({
     post: {
         type: Object,
@@ -24,7 +24,7 @@ const props = defineProps({
     }
 });
 
-const data = ref(cloneDeep(props.post));
+const data = ref(JSON.parse(JSON.stringify(props.post)));
 data.value = {
     ...data.value,
     typeBook: {
