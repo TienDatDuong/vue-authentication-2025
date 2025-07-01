@@ -6,7 +6,7 @@
         </div>
         <div class="input-group input-group-sm mb-3">
             <span class="input-group-text" id="inputGroup-sizing-sm">Loại sách:</span>
-            <input type="text" class="form-control" aria-label="Sizing example input" v-model="formData.typeBook.name" aria-describedby="inputGroup-sizing-sm">
+            <select-type-book @update:modelValue="getId" />
         </div>
         <div class="input-group input-group-sm mb-3">
             <span class="input-group-text" id="inputGroup-sizing-sm">Số lượng:</span>
@@ -16,15 +16,12 @@
 </template>
 <script setup>
 import { ref } from 'vue';
+import SelectTypeBook from '@/select-option/typeBook.vue';
 
 const formData = ref({
     name: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
     typeBook: { 
-        name: '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        id: '',
     },
     quantity: ''
 });
@@ -33,12 +30,14 @@ const formData = ref({
 const resetForm = () => {
     formData.value = {
         name: '',
-        typeBook: { name: '' },
+        typeBook: { id: '' },
         quantity: ''
     };
 };
 
-
+const getId = (id) => {    
+    formData.value.typeBook.id = id;
+};
 
 defineExpose({
     formData, resetForm
