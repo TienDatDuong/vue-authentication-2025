@@ -25,7 +25,7 @@
           <template v-if="isAuthenticated">
             <li class="nav-item">
               <router-link class="nav-link" to="/posts">
-                <i class="fas fa-list me-2"></i>Danh sách tài liệu
+                <i class="fas fa-list me-2"></i>Danh sách bộ phận quản lý
               </router-link>
             </li>
           </template>

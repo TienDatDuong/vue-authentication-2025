@@ -5,15 +5,15 @@
         <div class="row align-items-center">
           <div class="col-md-8">
             <h2 class="page-title">
-              <i class="fas fa-book me-3"></i>
+              <i class="fas fa-users me-3"></i>
               Quản lý người đọc, nhân sự của thư viện
             </h2>
-            <p class="page-subtitle">Hệ thống quản lý tài liệu thư viện</p>
+            <p class="page-subtitle">Hệ thống quản lý người đọc thư viện</p>
           </div>
           <div class="col-md-4 text-end">
             <div class="stats-card">
               <div class="stats-number">{{ posts.length }}</div>
-              <div class="stats-label">Tổng số tài liệu</div>
+              <div class="stats-label">Tổng số người đọc</div>
             </div>
           </div>
         </div>
@@ -31,7 +31,7 @@
                 <input 
                   type="text" 
                   class="form-control" 
-                  placeholder="Tìm kiếm tài liệu..." 
+                  placeholder="Tìm kiếm người đọc..." 
                   v-model.trim="search"
                   @keyup.enter="filterData()"
                 />
@@ -49,7 +49,7 @@
               data-bs-target="#staticBackdrop" 
               @click="openModal('create')"
             >
-              <i class="fas fa-plus me-2"></i>Thêm tài liệu mới
+              <i class="fas fa-plus me-2"></i>Thêm người đọc mới
             </button>
           </div>
         </div>
@@ -64,8 +64,8 @@
                 <thead class="table-dark">
                   <tr>
                     <th width="5%">#</th>
-                    <th width="40%">Tên Sinh Viên</th>
-                    <th width="40%">Lớp</th>
+                    <th width="40%">Tên người đọc</th>
+                    <th width="40%">Lớp/Khoa</th>
                     <th width="15%">Thao tác</th>
                   </tr>
                 </thead>
@@ -75,9 +75,9 @@
                       <span class="badge bg-primary">{{ idx + 1 }}</span>
                     </td>
                     <td>
-                      <div class="book-info">
-                        <div class="book-title">{{ post.name }}</div>
-                        <div class="book-id">ID: {{ post.id }}</div>
+                      <div class="student-info">
+                        <div class="student-name">{{ post.name }}</div>
+                        <div class="student-id">ID: {{ post.id }}</div>
                       </div>
                     </td>
                     <td>
@@ -117,10 +117,10 @@
                     </td>
                   </tr>
                   <tr v-if="posts.length === 0">
-                    <td colspan="5" class="text-center py-4">
+                    <td colspan="4" class="text-center py-4">
                       <div class="empty-state">
-                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">Chưa có tài liệu nào trong hệ thống</p>
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Chưa có người đọc nào trong hệ thống</p>
                       </div>
                     </td>
                   </tr>
@@ -137,24 +137,24 @@
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="staticBackdropLabel">
-                <i class="fas fa-book me-2"></i>{{ title }}
+                <i class="fas fa-users me-2"></i>{{ title }}
               </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <div class="input-group input-group-sm mb-3">
-              <span v-if="!isView" class="input-group-text" id="inputGroup-sizing-sm" style="width: 100px;">Tên sinh viên:</span>
-              <input type="text" v-if="!isView" class="form-control" aria-label="Sizing example input" v-model="formData.name" aria-describedby="inputGroup-sizing-sm">
-              <p v-else class="form-control-plaintext">Tên sinh viên: {{ formData.name }}</p>
-            </div> 
-        <div class="input-group input-group-sm mb-3">
-            <span v-if="!isView" class="input-group-text" id="inputGroup-sizing-sm" style="width: 100px;">Lớp:</span>
-            <input v-if="!isView" type="text" class="form-control" aria-label="Sizing example input" v-model="formData.course" aria-describedby="inputGroup-sizing-sm">
-            <p v-else class="form-control-plaintext">Lớp: {{ formData.course }}</p>
-        </div>
+                <span v-if="!isView" class="input-group-text" id="inputGroup-sizing-sm" style="width: 120px;">Tên người đọc:</span>
+                <input type="text" v-if="!isView" class="form-control" aria-label="Sizing example input" v-model="formData.name" aria-describedby="inputGroup-sizing-sm">
+                <p v-else class="form-control-plaintext">Tên người đọc: {{ formData.name }}</p>
+              </div> 
+              <div class="input-group input-group-sm mb-3">
+                <span v-if="!isView" class="input-group-text" id="inputGroup-sizing-sm" style="width: 120px;">Lớp/Khoa:</span>
+                <input v-if="!isView" type="text" class="form-control" aria-label="Sizing example input" v-model="formData.course" aria-describedby="inputGroup-sizing-sm">
+                <p v-else class="form-control-plaintext">Lớp/Khoa: {{ formData.course }}</p>
+              </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" id="close" data-bs-dismiss="modal">
+              <button type="button" class="btn btn-secondary" id="closeModal" @click="closeModal">
                 <i class="fas fa-times me-2"></i>Đóng
               </button>
               <button type="button" class="btn btn-primary" v-if="!isView" @click="handleSave">
@@ -174,23 +174,14 @@
     LOADING_SPINNER_SHOW_MUTATION,
   } from "../store/module/auth/storecontant";
   import axios from 'axios';
-  import {defineAsyncComponent} from "vue"
   
   export default {
-    name: "Post",
-    components: {
-      DetailModal: defineAsyncComponent(() => import("../modal/ql-dau-sach/detail.vue")),
-      EditModal: defineAsyncComponent(() => import("../modal/ql-dau-sach/edit.vue")),
-      CreateModal: defineAsyncComponent(() => import("../modal/ql-dau-sach/create.vue")),
-    },
+    name: "StudentManagement",
     data() {
       return {
         posts: [],
-        filterPosts: [],
         search: "",
         title: "Thông Tin Chi tiết",
-        dataEdit: {},
-        dataCreate: {},
         isCreate: false,
         formData: {
           name: "",
@@ -217,9 +208,7 @@
       }),
       init(){
         this.showLoading(true);
-        axios.get(
-          `/api/student/get-all`
-        )
+        axios.get(`/api/student/get-all`)
           .then((res) => {
             this.showLoading(false);
             console.log("res", res);
@@ -227,66 +216,102 @@
           })
           .catch((e) => {
             this.showLoading(false);
+            console.error("Error fetching students:", e);
           });
       },
-      openModal(type, post=this.formData) {
-        this.formData = post;
-        if(type === "view") {
-          this.title = "Thông Tin Chi tiết";
-        }
-        if(type === "edit") {
-          this.isCreate = false;
-          this.title = "Chỉnh sửa thông tin";
-        }
-        if(type === "create") {
+      openModal(type, post = {}) {
+        if (type === "create") {
+          this.formData = {
+            name: "",
+            course: "",
+            id: "",
+          };
           this.isCreate = true;
-          this.title = "Tạo mới đầu sách";
+          this.title = "Tạo mới người đọc";
+        } else {
+          this.formData = { ...post };
+          if(type === "view") {
+            this.title = "Thông Tin Chi tiết";
+          }
+          if(type === "edit") {
+            this.isCreate = false;
+            this.title = "Chỉnh sửa thông tin";
+          }
         }
       },
       async filterData(){
-        try
-        {
+        try {
           this.showLoading(true);
           const payload = {
             q: this.search,
           };
-          const res =await axios.get(`/api/book/search-name`, { params: payload });
+          const res = await axios.get(`/api/student/search`, { params: payload });
           this.showLoading(false);
           this.posts = res.data.data;
         } catch (e) {
           this.showLoading(false);
-          console.error("Error fetching data:", e);
+          console.error("Error searching students:", e);
+          // Fallback to get all if search fails
+          this.init();
         }
       },
-      async handleSave(){
-        try {
-          this.showLoading(true);
-          let data = {};
-          if(this.isCreate) {
-          data =  this.$refs.refCreate.formData;
+          async handleSave(){
+      try {
+        this.showLoading(true);
+        let data = {
+          name: this.formData.name,
+          course: this.formData.course
+        };
+        
+        if(this.isCreate) {
           await axios.post(`/api/student/create`, data);
-          this.$refs.refCreate?.resetForm();
-          } else {
-          data =  this.$refs.refEdit.data;
-          await axios.put(`/api/book/update?id=${this.formData.id}`, data);
-          }
-          
-          const modalEl = document.getElementById('staticBackdrop');
-          const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-          modalInstance.hide();
-          this.showLoading(false);
-          this.init(); // Refresh data
-  
-        } catch (e) {
-          this.showLoading(false);
-          console.error("Error saving data:", e);
-        }finally{
-          document.getElementById('close').click();
+        } else {
+          // Thêm id vào data khi edit
+          data.id = this.formData.id;
+          await axios.put(`/api/student/update?id=${this.formData.id}`, data);
         }
-      },
-      confirmDelete(post) {
-        if (confirm(`Bạn có chắc chắn muốn xóa tài liệu "${post.name}"?`)) {
-          axios.get(`/api/typebook/get-all`)
+        
+        this.showLoading(false);
+        this.init(); // Refresh data
+        this.closeModal(); // Đóng modal
+
+      } catch (e) {
+        this.showLoading(false);
+        console.error("Error saving student data:", e);
+        alert("Có lỗi xảy ra khi lưu dữ liệu!");
+      }
+    },
+    closeModal() {
+      const modalEl = document.getElementById('staticBackdrop');
+      if (modalEl) {
+        // Ẩn modal thủ công
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+        
+        // Xóa backdrop nếu có
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+          backdrop.remove();
+        }
+        
+        // Xóa padding-right từ body nếu có
+        document.body.style.paddingRight = '';
+      }
+    },
+      async confirmDelete(post) {
+        if (confirm(`Bạn có chắc chắn muốn xóa người đọc "${post.name}"?`)) {
+          try {
+            this.showLoading(true);
+            await axios.delete(`/api/student/delete?id=${post.id}`);
+            this.showLoading(false);
+            this.init(); // Refresh data
+            alert("Xóa người đọc thành công!");
+          } catch (e) {
+            this.showLoading(false);
+            console.error("Error deleting student:", e);
+            alert("Có lỗi xảy ra khi xóa người đọc!");
+          }
         }
       }
     },
@@ -400,34 +425,17 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   }
   
-  .book-info {
+  .student-info {
     display: flex;
     flex-direction: column;
   }
   
-  .book-title {
+  .student-name {
     font-weight: 600;
     color: #2c3e50;
   }
   
-  .book-id {
-    font-size: 0.8rem;
-    color: #6c757d;
-  }
-  
-  .quantity-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .quantity-number {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #28a745;
-  }
-  
-  .quantity-label {
+  .student-id {
     font-size: 0.8rem;
     color: #6c757d;
   }
