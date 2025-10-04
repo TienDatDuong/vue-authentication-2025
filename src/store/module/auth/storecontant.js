@@ -9,3 +9,4 @@ export const AUTH_ACTION = "[action] Do User Auth";
 export const GET_USER_TOKEN_GETTER = "[getters] auth user token";
 export const CHECK_ADMIN = "[getters] check admin";
 export const IS_USER_AUTHENTICATE_GETTER = "[getters] is user authenticated"
+export const EMAIL_GETTER = "[getters] email";

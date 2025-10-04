@@ -94,6 +94,7 @@ import SignupValidations from "../services/signupValidations";
 import {
   LOADING_SPINNER_SHOW_MUTATION,
   LOGIN_ACTION,
+  CHECK_ADMIN,
 } from "../store/module/auth/storecontant";
 import { mapActions, mapMutations } from "vuex";
 
@@ -135,7 +136,11 @@ export default {
           (this.error = e), this.showLoading(false);
         });
         this.showLoading(false);
-        this.$router.push("/posts");
+        if(this.$store.getters[`auth/${CHECK_ADMIN}`]){
+          this.$router.push("/ql-dau-sach");
+        }else{
+          this.$router.push("/books");
+        }
       }
     },
   },

@@ -45,7 +45,7 @@ watch(() => props.post, (newVal) => {
     data.value = {
         name: newVal.name || '',
         typeBook: { id: newVal.typeBook?.id || '' },
-        quantity: newVal.quantity || ''
+        quantity: +newVal.quantity || 0
     };
 }, { immediate: true,deep: true });
 

@@ -64,7 +64,7 @@ export default {
     async loadData() {
       this.loading = true;
       try {
-        const response = await axios.get('/api/coupon-details/get-all');
+        const response = await axios.get('/api/student/get-all');
         this.records = response.data.data || [];
         this.total = response.data.total || 0;
         this.filterRecords = [...this.records];

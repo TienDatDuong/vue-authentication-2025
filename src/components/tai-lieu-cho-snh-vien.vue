@@ -55,7 +55,7 @@
             data-bs-target="#staticBackdrop" 
             @click="openModal('create')"
           >
-            <i class="fas fa-plus me-2"></i>Thêm tài liệu mới
+            <i class="fas fa-plus me-2"></i>Tạo phiếu mượn
           </button>
         </div>
       </div>
@@ -180,14 +180,14 @@ import {
   LOADING_SPINNER_SHOW_MUTATION,
 } from "../store/module/auth/storecontant";
 import axios from 'axios';
-import {defineAsyncComponent} from "vue"
+import {defineAsyncComponent, nextTick} from "vue"
 
 export default {
   name: "Post",
   components: {
-    DetailModal: defineAsyncComponent(() => import("../modal/ql-dau-sach/detail.vue")),
-    EditModal: defineAsyncComponent(() => import("../modal/ql-dau-sach/edit.vue")),
-    CreateModal: defineAsyncComponent(() => import("../modal/ql-dau-sach/create.vue")),
+    DetailModal: defineAsyncComponent(() => import("../components/crud-tai-lieu-sinh-vien/detail.vue")),
+    EditModal: defineAsyncComponent(() => import("../components/crud-tai-lieu-sinh-vien/edit.vue")),
+    CreateModal: defineAsyncComponent(() => import("../components/crud-tai-lieu-sinh-vien/create.vue")),
   },
   data() {
     return {
@@ -247,7 +247,7 @@ export default {
       }
       if(type === "create") {
         this.isCreate = true;
-        this.title = "Tạo mới đầu sách";
+        this.title = "Tạo phiếu mượn";
       }
     },
     async filterData(){
@@ -283,11 +283,11 @@ export default {
         let data = {};
         if(this.isCreate) {
         data =  this.$refs.refCreate.formData;
-        await axios.post(`/api/book/create?id=${this.formData.id}`, data);
+        await axios.post(`/api/coupon/create`, data);
         this.$refs.refCreate?.resetForm();
         } else {
         data =  this.$refs.refEdit.data;
-        await axios.put(`/api/book/update?id=${this.formData.id}`, data);
+        await axios.put(`/api/book/update`, data);
         }
         
 
