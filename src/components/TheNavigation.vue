@@ -47,11 +47,11 @@
                     <i class="fas fa-book me-2"></i>Quản lý đầu sách
                   </router-link>
                 </li>
-                <li>
+                <!-- <li>
                   <router-link class="dropdown-item" to="/ql-nguoi-doc">
                     <i class="fas fa-users me-2"></i>Quản lý người đọc
                   </router-link>
-                </li>
+                </li> -->
                 <li>
                   <router-link class="dropdown-item" to="/ql-muon-tra">
                     <i class="fas fa-exchange-alt me-2"></i>Quản lý mượn trả
