@@ -1,640 +1,522 @@
-<script>
-import axios from "axios";
-import { mapMutations } from "vuex/dist/vuex.cjs.js";
-import {
-  LOADING_SPINNER_SHOW_MUTATION,
-} from "../store/module/auth/storecontant";
-import SelectTypeBook from '@/select-option/typeBook.vue';
-
-export default {
-  name: "QuanLyMuonTra",
-  components: {
-    SelectTypeBook
-  },
-  data() {
-    return {
-      records: [],
-      filterRecords: [],
-      search: "",
-      loading: false,
-
-      saving: false,
-      isEditing: false,
-      selectedRecord: {},
-
-      total: 0,
-      students: [], // Danh sách sinh viên
-            recordForm: {
-        coupon: {
-          id: "",
-          studentId: {
-            id: "",
-            name: "",
-            course: "",
-          },
-          librarianId: {
-            id: "",
-            name: "",
-            competence: "",
-          },
-          borrowedDate: "",
-          returnDate: "",
-          bookId: [
-            {
-              id: "",
-              name: "",
-              typeBook: "",
-              quantity: "",
-            }
-          ]
-        }
-      },
-      editingId: null
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    ...mapMutations({
-      showLoading: LOADING_SPINNER_SHOW_MUTATION,
-    }),
-
-    // Load all data in one call
-    async loadData() {
-      this.loading = true;
-      try {
-        const response = await axios.get('/api/student/get-all');
-        this.records = response.data.data || [];
-        this.total = response.data.total || 0;
-        this.filterRecords = [...this.records];
-        this.students = [...this.records]; // Use the same data for students
-        console.log("filterRecords", this.filterRecords);
-        
-      } catch (error) {
-        console.error('Error loading data:', error);
-        this.showError('Không thể tải dữ liệu');
-      } finally {
-        this.loading = false;
-      }
-    },
-    // Filter records
-    filterData() {
-      const keyword = this.search.toLowerCase();
-      if (!keyword) {
-        this.filterRecords = [...this.records];
-        return;
-      }
-      this.filterRecords = this.records.filter((record) => {
-        return (
-          (record.student?.name || "").toLowerCase().includes(keyword) ||
-          (record.librarian?.name || "").toLowerCase().includes(keyword)
-        );
-      });
-    },
-
-    // View record details
-    async viewRecord(couponId) {
-      console.log("couponId", couponId);
-      try {
-        // Get librarian info
-        const librarianResponse = await axios.get(`/api/librarian/get-info?id=${couponId}`);
-        console.log("librarian response", librarianResponse);
-
-        if (librarianResponse.data.code === 200) {
-          this.selectedRecord = {
-            librarianData: librarianResponse.data.data || {}
-          };
-        } else {
-          throw new Error('Không thể tải thông tin chi tiết');
-        }
-      } catch (error) {
-        console.error('Error loading record details:', error);
-        this.showError('Không thể tải thông tin mượn trả');
-      }
-    },
-
-
-
-    // Open create modal
-    openCreateModal() {
-      this.isEditing = false;
-      this.editingId = null;
-      this.resetForm();
-      // Ensure the form is properly initialized for new records
-      this.recordForm.coupon.id = "";
-      this.recordForm.coupon.studentId.id = "";
-      this.recordForm.coupon.librarianId.id = "";
-      this.recordForm.coupon.bookId[0].id = "";
-    },
-
-    // Open edit modal
-    async editRecord(couponId) {
-      try {
-        // Find record from loaded records
-        const record = this.records.find(r => r.couponId === couponId);
-        if (!record) throw new Error('Không tìm thấy bản ghi');
-        
-        // Populate form with existing data
-        this.recordForm = {
-          coupon: {
-            id: record.couponId || "",
-            studentId: {
-              id: record.student?.id || "",
-              name: record.student?.name || "",
-              course: record.student?.course || "",
-            },
-            librarianId: {
-              id: record.librarian?.id || "",
-              name: record.librarian?.name || "",
-              competence: record.librarian?.competence || "",
-            },
-            borrowedDate: this.formatDateForInput(record.borrowedDate),
-            returnDate: record.returnDate ? this.formatDateForInput(record.returnDate) : "",
-            bookId: [
-              {
-                id: record.bookId || "",
-                name: record.bookName || "",
-                typeBook: record.bookType || "",
-                quantity: record.quantity || "",
-              }
-            ]
-          }
-        };
-        
-        this.isEditing = true;
-        this.editingId = couponId;
-      } catch (error) {
-        console.error('Error loading record for edit:', error);
-        this.showError('Không thể tải thông tin để chỉnh sửa');
-      }
-    },
-
-    // Return book
-    async returnBook(id) {
-      if (!confirm('Xác nhận trả sách?')) {
-        return;
-      }
-
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        await axios.put(`/api/coupon-details/update?id=${id}`, {
-          returnDate: today
-        });
-        this.showSuccess('Trả sách thành công');
-        this.loadData();
-      } catch (error) {
-        console.error('Error returning book:', error);
-        this.showError('Không thể trả sách');
-      }
-    },
-
-    // Save record (create or update)
-    async saveRecord() {
-      this.saving = true;
-      try {
-        // Prepare data for API
-        const apiData = {
-          studentId: {
-            name: this.recordForm.coupon.studentId.name,
-            course: this.recordForm.coupon.studentId.course
-          },
-          librarianId: {
-            name: this.recordForm.coupon.librarianId.name,
-            competence: this.recordForm.coupon.librarianId.competence
-          },
-          bookId: this.recordForm.coupon.bookId[0],
-          borrowedDate: this.recordForm.coupon.borrowedDate,
-          returnDate: this.recordForm.coupon.returnDate || null
-        };
-
-        if (this.isEditing) {
-          await axios.put(`/api/coupon-details/update?id=${this.editingId}`, apiData);
-          this.showSuccess('Cập nhật thông tin mượn trả thành công');
-        } else {
-          await axios.post('/api/coupon-details/create', apiData);
-          this.showSuccess('Tạo bản ghi mượn sách mới thành công');
-        }
-        // Close modal using Bootstrap
-        const modal = bootstrap.Modal.getInstance(document.getElementById('recordModal'));
-        if (modal) {
-          modal.hide();
-        }
-        this.loadData();
-      } catch (error) {
-        console.error('Error saving record:', error);
-        this.showError(this.isEditing ? 'Không thể cập nhật thông tin' : 'Không thể tạo bản ghi mới');
-      } finally {
-        this.saving = false;
-      }
-    },
-
-    // Delete record
-    async deleteRecord(id) {
-      if (!confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
-        return;
-      }
-
-      try {
-        await axios.delete(`/api/coupon-details/delete?id=${id}`);
-        this.showSuccess('Xóa bản ghi thành công');
-        this.loadData();
-      } catch (error) {
-        console.error('Error deleting record:', error);
-        this.showError('Không thể xóa bản ghi');
-      }
-    },
-
-    // Utility methods
-    resetForm() {
-      this.recordForm = {
-        coupon: {
-          id: "",
-          studentId: {
-            id: "",
-            name: "",
-            course: "",
-          },
-          librarianId: {
-            id: "",
-            name: "",
-            competence: "",
-          },
-          borrowedDate: "",
-          returnDate: "",
-          bookId: [
-            {
-              id: "",
-              name: "",
-              typeBook: "",
-              quantity: "",
-            }
-          ]
-        }
-      };
-    },
-
-    formatDate(dateString) {
-      if (!dateString) return 'N/A';
-      return new Date(dateString).toLocaleDateString('vi-VN');
-    },
-
-    formatDateForInput(dateString) {
-      if (!dateString) return '';
-      return new Date(dateString).toISOString().split('T')[0];
-    },
-
-    getStatusText(returnDate) {
-      if (!returnDate) {
-        return 'Đang mượn';
-      }
-      const returnDateObj = new Date(returnDate);
-      const today = new Date();
-      if (returnDateObj < today) {
-        return 'Đã trả';
-      } else {
-        return 'Đã trả';
-      }
-    },
-
-    getStatusClass(returnDate) {
-      if (!returnDate) {
-        return 'badge bg-warning';
-      }
-      const returnDateObj = new Date(returnDate);
-      const today = new Date();
-      if (returnDateObj < today) {
-        return 'badge bg-success';
-      } else {
-        return 'badge bg-info';
-      }
-    },
-
-
-
-    showSuccess(message) {
-      // You can implement a toast notification here
-      alert(message);
-    },
-
-    showError(message) {
-      // You can implement a toast notification here
-      alert('Lỗi: ' + message);
-    }
-  },
-};
-</script>
-
 <template>
-  <h2 class="u-margin-bottom-small">Quản lý mượn trả tài liệu</h2>
-  
-  <!-- Search and Add Section -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="input-group" style="max-width: 400px;">
-      <input 
-        type="text" 
-        class="form-control" 
-        placeholder="Nhập tên sinh viên hoặc người quản lý" 
-        v-model="search" 
-        @keyup.enter="filterData()"
-      />
-      <button class="btn btn-primary" type="button" @click="filterData()">
-        <i class="fas fa-search"></i> Tìm kiếm
-      </button>
-    </div>
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#recordModal" @click="openCreateModal()">
-      <i class="fas fa-plus"></i> Thêm mượn sách mới
-    </button>
-  </div>
-
-  <!-- Loading Spinner -->
-  <div v-if="loading" class="text-center py-4">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-
-  <!-- Borrowing Records Table -->
-  <div v-else>
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <h6 class="text-muted">Tổng số: {{ total }} bản ghi</h6>
-    </div>
-    
-    <table class="table table-striped table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>STT</th>
-          <th>Tên người quản lý/Chức vụ</th>
-          <th>Tên người mượn sách/lớp</th>
-          <th>Ngày mượn</th>
-          <th>Ngày trả</th>
-          <th>Thao tác</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item, index) in filterRecords" :key="item.id">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <div>
-              <strong>{{ item.librarian?.name || 'N/A' }}</strong>
-              <br>
-              <small class="text-muted">{{ item.librarian?.competence || 'N/A' }}</small>
-            </div>
-          </td>
-          <td>
-            <div>
-              <strong>{{ item.student?.name || 'N/A' }}</strong>
-              <br>
-              <small class="text-muted">{{ item.student?.course || 'N/A' }}</small>
-            </div>
-          </td>
-          <td>{{ formatDate(item.borrowedDate) }}</td>
-          <td>{{ item.returnDate ? formatDate(item.returnDate) : 'Chưa trả' }}</td>
-          <td>
-            {{ item.id }}
-            <div class="btn-group" role="group">
-              <button 
-                class="btn btn-sm btn-info" 
-                data-bs-toggle="modal" 
-                data-bs-target="#detailModal"
-                @click="viewRecord(item.couponId)"
-                title="Xem chi tiết"
-              >
-                <i class="fas fa-eye"></i>
-              </button>
-              <button 
-                class="btn btn-sm btn-warning" 
-                data-bs-toggle="modal" 
-                data-bs-target="#recordModal"
-                @click="editRecord(item.couponId)"
-                title="Chỉnh sửa"
-              >
-                <i class="fas fa-edit"></i>
-              </button>
-              <button 
-                class="btn btn-sm btn-success" 
-                v-if="!item?.returnDate"
-                @click="returnBook(item.id)"
-                title="Trả sách"
-              >
-                <i class="fas fa-undo"></i>
-              </button>
-              <button 
-                class="btn btn-sm btn-danger" 
-                @click="deleteRecord(item.id)"
-                title="Xóa"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Empty State -->
-    <div v-if="filterRecords.length === 0" class="text-center py-5">
-      <i class="fas fa-book fa-3x text-muted mb-3"></i>
-      <h5 class="text-muted">Không tìm thấy bản ghi mượn trả nào</h5>
-      <p class="text-muted">Hãy thử thay đổi từ khóa tìm kiếm hoặc tạo bản ghi mượn sách mới</p>
-    </div>
-  </div>
-
-  <!-- Create/Edit Modal -->
-  <div class="modal fade" id="recordModal" tabindex="-1" ref="recordModal">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ isEditing ? 'Chỉnh sửa thông tin mượn sách' : 'Thêm mượn sách mới' }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <div class="library-management">
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h2 class="page-title">
+            <i class="fas fa-clipboard-list me-3"></i>
+            Quản lý phiếu mượn trả sách
+          </h2>
+          <p class="page-subtitle">Hệ thống quản lý phiếu mượn trả tài liệu thư viện</p>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveRecord">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Tên sinh viên mượn sách</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.studentId.name" 
-                    placeholder="Nhập tên sinh viên"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Lớp sinh viên</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.studentId.course" 
-                    placeholder="Nhập lớp sinh viên"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Tên người quản lý</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.librarianId.name" 
-                    placeholder="Nhập tên người quản lý"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Chức vụ người quản lý</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.librarianId.competence" 
-                    placeholder="Nhập chức vụ"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Loại sách</label>
-                  <SelectTypeBook 
-                    v-model="recordForm.coupon.bookId[0].typeBook"
-                    placeholder="Chọn loại sách"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Tên sách</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.bookId[0].name" 
-                    placeholder="Nhập tên sách"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Số lượng</label>
-                  <input 
-                    type="number" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.bookId[0].quantity" 
-                    placeholder="Nhập số lượng"
-                    min="1"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Ngày mượn</label>
-                  <input 
-                    type="date" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.borrowedDate" 
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Ngày trả (tùy chọn)</label>
-                  <input 
-                    type="date" 
-                    class="form-control" 
-                    v-model="recordForm.coupon.returnDate"
-                  />
-                </div>
-              </div>
-            </div>
-          </form>
+        <div class="col-md-4 text-end">
+          <div class="stats-card">
+            <div class="stats-number">{{ posts.length }}</div>
+            <div class="stats-label">Tổng số phiếu mượn</div>
+          </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+      </div>
+    </div>
+
+    <!-- Actions Section -->
+    <div class="actions-section">
+      <div class="row">
+        <div class="col-md-12 text-end">
           <button 
             type="button" 
-            class="btn btn-primary" 
-            @click="saveRecord"
-            :disabled="saving"
+            class="btn btn-success btn-lg" 
+            data-bs-toggle="modal" 
+            data-bs-target="#staticBackdrop" 
+            @click="openModal('create')"
           >
-            <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-            {{ isEditing ? 'Cập nhật' : 'Tạo mới' }}
+            <i class="fas fa-plus me-2"></i>Tạo phiếu mượn
           </button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Detail Modal -->
-  <div class="modal fade" id="detailModal" tabindex="-1" ref="detailModal">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Chi tiết thông tin mượn trả</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Data Table Section -->
+    <div class="data-section">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th width="5%">#</th>
+                  <th width="15%">Mã phiếu</th>
+                  <th width="20%">Sinh viên</th>
+                  <th width="20%">Thủ thư</th>
+                  <th width="15%">Ngày mượn</th>
+                  <th width="15%">Ngày trả</th>
+                  <th width="10%">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(coupon, idx) in posts" :key="coupon.couponId" class="table-row">
+                  <td class="text-center">
+                    <span class="badge bg-primary">{{ idx + 1 }}</span>
+                  </td>
+                  <td>
+                    <div class="coupon-info">
+                      <div class="coupon-id">#{{ coupon.couponId }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="student-info">
+                      <div class="student-name">{{ coupon.student?.name || 'N/A' }}</div>
+                      <div class="student-course">{{ coupon.student?.course || 'N/A' }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="librarian-info">
+                      <div class="librarian-name">{{ coupon.librarian?.name || 'N/A' }}</div>
+                      <div class="librarian-competence">{{ coupon.librarian?.competence || 'N/A' }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="date-info">
+                      <div class="date-value">{{ formatDate(coupon.borrowedDate) }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="date-info">
+                      <div class="date-value">{{ formatDate(coupon.returnDate) }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-primary btn-sm"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#staticBackdrop" 
+                        @click="openModal('view', coupon)"
+                        title="Xem chi tiết"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-danger btn-sm"
+                        title="Xóa"
+                        @click="confirmDelete(coupon)"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-if="posts.length === 0">
+                  <td colspan="7" class="text-center py-4">
+                    <div class="empty-state">
+                      <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                      <p class="text-muted">Chưa có phiếu mượn nào trong hệ thống</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="modal-body" v-if="selectedRecord">
-          <!-- Librarian Information -->
-          <div class="row">
-            <div class="col-12">
-              <h6 class="text-primary mb-3">Thông tin người quản lý</h6>
-              <div v-if="!selectedRecord.librarianData" class="text-center py-3">
-                <p class="text-muted">Không có thông tin người quản lý</p>
-              </div>
-              <div v-else>
-                <div class="card">
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col-md-6">
-                        <p><strong>ID:</strong> {{ selectedRecord.librarianData.id || 'N/A' }}</p>
-                        <p><strong>Tên:</strong> {{ selectedRecord.librarianData.name || 'N/A' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <p><strong>Chức vụ:</strong> {{ selectedRecord.librarianData.competence || 'N/A' }}</p>
-                        <p><strong>Ngày tạo:</strong> {{ selectedRecord.librarianData.createdAt ? formatDate(selectedRecord.librarianData.createdAt) : 'N/A' }}</p>
-                      </div>
-                    </div>
-                    <div class="row mt-3">
-                      <div class="col-12">
-                        <p><strong>Cập nhật lần cuối:</strong> {{ selectedRecord.librarianData.updateAt ? formatDate(selectedRecord.librarianData.updateAt) : 'Chưa cập nhật' }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">
+              <i class="fas fa-book me-2"></i>{{ title }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <detail-modal :post="formData" v-if="isView"  ref="refDetail"/>
+            <edit-modal :post="formData" v-if="!isCreate && !isView" ref="refEdit"/>
+            <create-modal v-if="isCreate && !isView" ref="refCreate"/>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-2"></i>Đóng
+            </button>
+            <button type="button" class="btn btn-primary" v-if="!isView" @click="handleSave">
+              <i class="fas fa-save me-2"></i>Lưu thay đổi
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script>
+import { mapGetters, mapMutations } from "vuex/dist/vuex.cjs.js";
+import {
+  GET_USER_TOKEN_GETTER,
+  LOADING_SPINNER_SHOW_MUTATION,
+} from "../store/module/auth/storecontant";
+import axios from 'axios';
+import {defineAsyncComponent, nextTick} from "vue"
+
+export default {
+  name: "Post",
+  components: {
+    DetailModal: defineAsyncComponent(() => import("../components/crud-quan-ly-muon-tra/detail.vue")),
+    CreateModal: defineAsyncComponent(() => import("../components/crud-tai-lieu-sinh-vien/create.vue")),
+  },
+  data() {
+    return {
+      posts: [],
+      title: "Thông Tin Chi tiết",
+      dataEdit: {},
+      dataCreate: {},
+      isCreate: false,
+      formData: {
+        name: "",
+        typeBook: "",
+        quantity: 0,
+      },
+    };
+  },
+  computed: {
+    ...mapGetters("auth", {
+      token: GET_USER_TOKEN_GETTER,
+    }),
+    isView(){
+      if(this.title === "Thông Tin Chi tiết") return true;
+      return false;  
+    }
+  },
+  mounted() {
+    this.init();
+  },
+  methods: {
+    ...mapMutations({
+      showLoading: LOADING_SPINNER_SHOW_MUTATION,
+    }),
+    init(){
+      this.showLoading(true);
+      axios.get(
+        `/api/coupon-details/get-all`
+      )
+        .then((res) => {
+          this.showLoading(false);
+          console.log("res", res);
+          this.posts = res.data.data;
+        })
+        .catch((e) => {
+          this.showLoading(false);
+        });
+    },
+    openModal(type, post=this.formData) {
+      this.formData = post;
+      if(type === "view") {
+        this.title = "Thông Tin Chi tiết";
+        this.$refs.refDetail.resetData()
+      }
+      if(type === "create") {
+        this.isCreate = true;
+        this.title = "Tạo phiếu mượn";
+        this.$refs.refCreate.resetForm()
+      }
+    },
+    async handleSave(){
+      try {
+        this.showLoading(true);
+        let data = {};
+        if(this.isCreate) {
+        data =  this.$refs.refCreate.formData;
+        await axios.post(`/api/coupon/create`, data);
+        this.$refs.refCreate?.resetForm();
+        }
+      } catch (e) {
+        this.showLoading(false);
+        console.error("Error saving data:", e);
+      } finally{
+           // Đóng modal sau khi update thành công
+          const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+              backdrop.remove();
+            }
+      this.init()
+      }    
+    },
+    async confirmDelete(coupon) {
+      if (confirm(`Bạn có chắc chắn muốn xóa phiếu mượn #${coupon.couponId}?`)) {
+        console.log("coupon", coupon)
+
+        await axios.delete(`/api/coupon/delete?id=${coupon.couponId}`);
+         // Đóng modal sau khi update thành công
+        const backdrop = document.querySelector('.modal-backdrop');
+          if (backdrop) {
+            backdrop.remove();
+          }
+      this.init()
+      }
+    },
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
+  },
+};
+</script>
+
 <style scoped>
-.table th {
+.library-management {
+  padding: 0;
+}
+
+.page-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-subtitle {
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.stats-card {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.stats-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stats-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.actions-section {
+  background: #ccc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.search-box .input-group {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.search-box .input-group-text {
+  background: #f8f9fa;
+  border: none;
+  color: #6c757d;
+}
+
+.search-box .form-control {
+  border: none;
+  padding: 0.75rem 1rem;
+}
+
+.search-box .btn {
+  border-radius: 0 12px 12px 0;
+  padding: 0.75rem 1.5rem;
+}
+
+.data-section .card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.table {
+  margin: 0;
+}
+
+.table-dark {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+}
+
+.table-dark th {
+  border: none;
+  padding: 1rem;
   font-weight: 600;
 }
 
-.btn-group .btn {
-  margin-right: 2px;
+.table-row {
+  transition: all 0.3s ease;
 }
 
-.btn-group .btn:last-child {
-  margin-right: 0;
+.table-row:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.modal-dialog {
-  max-width: 800px;
+.coupon-info {
+  display: flex;
+  flex-direction: column;
 }
 
-.modal-xl {
-  max-width: 1200px;
+.coupon-id {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
 }
 
-.badge {
-  font-size: 0.8em;
+.student-info {
+  display: flex;
+  flex-direction: column;
 }
 
-.text-primary {
-  color: #0d6efd !important;
+.student-name {
+  font-weight: 600;
+  color: #2c3e50;
 }
 
-.table-sm td, .table-sm th {
-  padding: 0.5rem;
-  font-size: 0.875rem;
+.student-course {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.librarian-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.librarian-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.librarian-competence {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.date-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-value {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.quantity-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantity-number {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #28a745;
+}
+
+.quantity-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-buttons .btn {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-2px);
+}
+
+.empty-state {
+  padding: 3rem;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px 15px 0 0;
+}
+
+.modal-title {
+  font-weight: 600;
+}
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 1rem 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .stats-card {
+    margin-top: 1rem;
+  }
+  
+  .actions-section {
+    padding: 1rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .action-buttons .btn {
+    width: 30px;
+    height: 30px;
+  }
 }
 </style>

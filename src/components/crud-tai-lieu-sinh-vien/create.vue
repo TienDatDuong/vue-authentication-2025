@@ -1,12 +1,12 @@
 <template>
     <div>
         <div class="input-group input-group-sm mb-3">
-            <span class="input-group-text" id="inputGroup-sizing-sm">Email:</span>
-            <input type="text" class="form-control" aria-label="Sizing example input" v-model="formData.masv" aria-describedby="inputGroup-sizing-sm">
+            <span class="input-group-text" id="inputGroup-sizing-sm">Sinh viên:</span>
+            <select-sinh-vien @change="getInfoSinhVien" ref="refSv" />
         </div>
         <div class="input-group input-group-sm mb-3">
             <span class="input-group-text" id="inputGroup-sizing-sm">Thủ thư:</span>
-            <input type="text" class="form-control" aria-label="Sizing example input" v-model="formData.mathuthu" aria-describedby="inputGroup-sizing-sm">
+            <select-thu-thu @change="getInfoThuThu" ref="refTT" />
         </div>
         <div class="input-group input-group-sm mb-3">
             <span class="input-group-text" id="inputGroup-sizing-sm">Ngày trả:</span>
@@ -21,7 +21,7 @@
         </div>
         <div class="input-group input-group-sm mb-3">
             <span class="input-group-text" id="inputGroup-sizing-sm">Loại sách:</span>
-            <select-type-book @change="getInfoBook" />
+            <select-type-book @change="getInfoBook" ref="refLs" />
         </div>
         <div class="input-group input-group-sm mb-3">
             <span class="input-group-text" id="inputGroup-sizing-sm">Tên sách:</span>
@@ -41,10 +41,17 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
 import SelectTypeBook from '@/select-option/typeBook.vue';
-import SelectBook from '@/select-option/nameBook.vue'
+import SelectBook from '@/select-option/nameBook.vue';
+import SelectSinhVien from '@/select-option/select-sinh-vien.vue';
+import SelectThuThu from '@/select-option/select-thu-thu.vue';  
 import { EMAIL_GETTER } from '@/store/module/auth/storecontant'
 import { useStore } from 'vuex'
+import { cloneDeep } from 'lodash';
 const store = useStore()
+
+const refSv = ref();
+const refTT = ref();
+const refLs = ref();
 
 // Tính ngày tối thiểu (ngày mai)
 const minDate = computed(() => {
@@ -53,31 +60,27 @@ const minDate = computed(() => {
     return tomorrow.toISOString().split('T')[0];
 });
 
-const formData = ref({
+const initForm = {
         masv: store.getters[`auth/${EMAIL_GETTER}`],
         mathuthu: '',
         ngaytra: '',
         danhSachSach: [
             { 
             masach: '',
-            soluong: '',
-            name: ''
+            soluong: ''
             }
         ]
-    });
+    }
+
+const formData = ref(cloneDeep(initForm));
 
 
 const resetForm = () => {
-    formData.value = {
-        masv: '',
-        mathuthu: '',
-        ngaytra: '',
-        danhSachSach: [{ 
-            masach: '',
-            soluong: '',
-            name: ''
-        }]
-    };
+    refSv.value.resetData()
+    refTT.value.resetData()
+    refLs.value.resetData()
+    selectBookRef.value.resetData()
+    formData.value = cloneDeep(initForm);
 };
 
 const dataTyptBook = reactive({
@@ -101,8 +104,7 @@ const bookId = (id) => {
     if (selectBookRef.value && selectBookRef.value.dataSelect) {
         const selectedBook = selectBookRef.value.dataSelect.find(book => book.id == id);
         if (selectedBook) {
-            formData.value.danhSachSach[0].masach = id;
-            formData.value.danhSachSach[0].name = selectedBook.name;
+            formData.value.danhSachSach[0].masach = String(id);
         }
     }
 };
@@ -120,6 +122,13 @@ const validateDate = (event) => {
     }
 };
 
+const getInfoThuThu = (info) => {
+    formData.value.mathuthu = info.id;
+};
+
+const getInfoSinhVien = (info) => {
+    formData.value.masv = info.id;
+};
 
 defineExpose({
     formData, resetForm

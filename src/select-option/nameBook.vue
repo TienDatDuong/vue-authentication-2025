@@ -55,10 +55,14 @@ watch(typeBook, (newVal) => {
 }, { immediate: true });
 
 // Expose dataSelect để parent có thể truy cập
-defineExpose({
-    dataSelect
-});
+const resetData = () => {
+    modelValue.value = ''
+}
 
+
+defineExpose({
+    resetData,dataSelect
+})
 </script>
 <template>
     <select class="form-select" aria-label="Default select example" v-model="modelValue" @change="getValue($event)" :disabled="!showBook">

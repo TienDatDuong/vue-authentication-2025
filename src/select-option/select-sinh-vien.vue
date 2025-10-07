@@ -14,8 +14,9 @@ const getValue = (event) => {
     emit('change', { id: selectedId, name: selectedName });
 };
 
+
 onMounted(() => {
-    axios.get(`/api/typebook/get-all`)
+    axios.get(`/api/student/get-all`)
         .then(response => {
             data.value = response.data.data;            
         })

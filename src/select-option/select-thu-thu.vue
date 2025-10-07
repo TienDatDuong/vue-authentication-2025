@@ -15,7 +15,7 @@ const getValue = (event) => {
 };
 
 onMounted(() => {
-    axios.get(`/api/typebook/get-all`)
+    axios.get(`/api/librarian/get-all`)
         .then(response => {
             data.value = response.data.data;            
         })
