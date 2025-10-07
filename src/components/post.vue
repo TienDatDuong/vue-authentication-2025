@@ -277,7 +277,7 @@ export default {
       this.saving = true;
       try {
         if (this.isEditing) {
-          await axios.put('/api/librarian/update', {
+          await axios.put(`/api/librarian/update?id=${this.editingId}`, {
             id: this.editingId,
             ...this.librarianForm
           });

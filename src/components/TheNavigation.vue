@@ -32,11 +32,11 @@
 
           <!-- Menu cho quản lý -->
           <template v-if="isManager">
-            <!-- <li class="nav-item">
+            <li class="nav-item">
               <router-link class="nav-link" to="/posts">
                 <i class="fas fa-list me-2"></i>Danh sách bộ phận quản lý
               </router-link>
-            </li> -->
+            </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                 <i class="fas fa-cogs me-2"></i>Quản lý hệ thống
