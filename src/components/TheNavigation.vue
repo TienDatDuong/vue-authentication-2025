@@ -25,8 +25,13 @@
           <template v-if="isAuthenticated && !isManager">
             <li class="nav-item">
               <router-link class="nav-link" to="/books">
-                <i class="fas fa-list me-2"></i>Danh sách tài liệu cho sinh viên
+                <i class="fas fa-list me-2"></i>Danh sách phiếu mượn trả
               </router-link>
+            </li>
+            <li>
+                  <router-link class="dropdown-item" to="/ds-tai-lieu">
+                    <i class="fas fa-book me-2"></i>Danh sách tài liệu cho sinh viên
+                  </router-link>
             </li>
           </template>
 

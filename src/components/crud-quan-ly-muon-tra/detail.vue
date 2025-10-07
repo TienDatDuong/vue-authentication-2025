@@ -90,6 +90,12 @@
                     </div>
                 </div>
             </div>
+            <div class="center">
+                <button type="button" class="btn btn-primary" style="width: 200px;" @click="handleReturnBook" :disabled="dataDetail.booksData[0].borrowedQuantity === dataDetail.booksData[0].returnedQuantity">
+                    <i class="fas fa-save me-2"></i>
+                        {{ dataDetail.booksData[0].borrowedQuantity === dataDetail.booksData[0].returnedQuantity ? 'Đã trả đủ' : 'Trả sách' }}
+                </button>
+            </div>
         </div>
         <div v-else class="text-center">
             <div class="spinner-border" role="status">
@@ -144,11 +150,28 @@ const loadBookDetails = async (couponId) => {
     }
 };
 
+const handleReturnBook =  async() => {
+    try{
+        console.log("dataDetail.value",dataDetail.value)
+        axios.get(`/api/coupon-details/verify-return-book?idCoupon=${dataDetail.value.couponId}&idBook=${dataDetail.value.booksData[0].id}&quantity=${dataDetail.value.booksData[0].borrowedQuantity}`);
+    } catch (err) {
+        console.log("err", err);
+    }
+}
+
 const resetData = () => {
-    loadBookDetails(post.couponId);
+    loadBookDetails(props.post.couponId);
 }
 
 defineExpose({
     resetData
 })
 </script>
+<style scoped>
+.center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 16px;
+}
+</style>

@@ -4,6 +4,7 @@ import Signup from "./pages/signup.vue";
 import Post from "./components/post.vue";
 //import Home from "./components/home.vue"
 import QlDauSach from "./components/ql-dau-sach.vue";
+import danhSachTaiLieuSv from "./components/danh-sach-tai-lieu-sv.vue";
 import qlMuonTra from "./components/ql-muon-tra.vue";
 import qlNguoiDoc from "./components/ql-nguoi-doc.vue";
 import taiLieu from "./components/tai-lieu-cho-snh-vien.vue";
@@ -19,6 +20,7 @@ const routes = [
   { path: "/ql-dau-sach", component: QlDauSach, meta: { auth: true } },
   { path: "/ql-muon-tra", component: qlMuonTra, meta: { auth: true } },
   { path: "/ql-nguoi-doc", component: qlNguoiDoc, meta: { auth: true } },
+  { path: "/ds-tai-lieu", component: danhSachTaiLieuSv, meta: { auth: true } },
 ];
 
 const router = createRouter({
